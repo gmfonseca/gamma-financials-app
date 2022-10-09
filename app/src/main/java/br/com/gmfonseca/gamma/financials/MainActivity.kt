@@ -58,10 +58,12 @@ fun Greeting(viewModel: MainViewModel) {
     val value = numberFormatter.format(state.value)
     val result = state.result?.let { numberFormatter.format(it) } ?: "--"
 
-    Surface(modifier = Modifier
-        .fillMaxSize()
-        .padding(16.dp),
-        color = MaterialTheme.colorScheme.background) {
+    Surface(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        color = MaterialTheme.colorScheme.background
+    ) {
         Column {
             Text(
                 text = "Exchange",
@@ -74,10 +76,11 @@ fun Greeting(viewModel: MainViewModel) {
                 CurrencyDropdown(
                     text = "From",
                     selectedCurrency = state.fromCurrency,
-                    otherCurrency = state.toCurrency,
                     menuState = fromMenuState,
-                    onOptionClick = {
-                        viewModel.loadExchange(fromCurrency = it, toCurrency = state.toCurrency)
+                    onOptionClick = { new ->
+                        val to = state.toCurrency.takeIf { it != new } ?: state.fromCurrency
+
+                        viewModel.loadExchange(new, to)
                     },
                     modifier = Modifier
                         .weight(1f)
@@ -87,10 +90,11 @@ fun Greeting(viewModel: MainViewModel) {
                 CurrencyDropdown(
                     text = "To",
                     selectedCurrency = state.toCurrency,
-                    otherCurrency = state.fromCurrency,
                     menuState = toMenuState,
-                    onOptionClick = {
-                        viewModel.loadExchange(state.fromCurrency, it)
+                    onOptionClick = { new ->
+                        val from = state.fromCurrency.takeIf { it != new } ?: state.toCurrency
+
+                        viewModel.loadExchange(from, new)
                     },
                     modifier = Modifier
                         .weight(1f)
@@ -99,17 +103,12 @@ fun Greeting(viewModel: MainViewModel) {
             }
             LabeledTextField(
                 label = "Amount",
-                value = "${state.value}",
-                onValueChange = {
-                    try {
-                        viewModel.convert(it.toDouble())
-                    } catch (e: NumberFormatException) {
-                        print("Not a number: $e")
-                    }
-                },
+                value = state.valueTxt,
+                onValueChange = viewModel::convert,
                 keyboardOptions = KeyboardOptions(autoCorrect = false,
                     keyboardType = KeyboardType.Number),
-                modifier = Modifier.padding(vertical = 16.dp)
+                modifier = Modifier.padding(vertical = 16.dp),
+                singleLine = true
             )
 
             Card(modifier = Modifier

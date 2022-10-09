@@ -9,6 +9,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import br.com.gmfonseca.gamma.financials.domain.model.Currency
 import br.com.gmfonseca.gamma.financials.ui.theme.MyApplicationTheme
@@ -18,12 +19,12 @@ import br.com.gmfonseca.gamma.financials.ui.theme.MyApplicationTheme
 fun CurrencyDropdown(
     text: String,
     selectedCurrency: Currency,
-    otherCurrency: Currency,
     menuState: MutableState<Boolean>,
     onOptionClick: (Currency) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val (showMenu, setShowMenu) = menuState
+
     Box(modifier) {
         LabeledTextField(
             label = text,
@@ -37,16 +38,20 @@ fun CurrencyDropdown(
             onDismissRequest = { setShowMenu(false) },
         ) {
             Currency.values()
-                .filter { otherCurrency != it }
                 .forEach {
+                    val enabled = it != selectedCurrency
+
                     DropdownMenuItem(
                         onClick = {
                             onOptionClick(it)
                             setShowMenu(false)
                         },
-                        enabled = it != selectedCurrency
+                        enabled = enabled
                     ) {
-                        Text(it.name)
+                        Text(
+                            it.name,
+                            color = if (enabled) Color.Black else Color.LightGray
+                        )
                     }
                 }
         }
@@ -62,7 +67,6 @@ fun DefaultPreview() {
         CurrencyDropdown(
             "From",
             Currency.USD,
-            Currency.BRL,
             menuState,
             {},
             Modifier

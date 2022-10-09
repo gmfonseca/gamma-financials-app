@@ -27,17 +27,21 @@ class MainViewModel(
             val state = uiState.value
 
             if (state.exchange == null || state.fromCurrency != fromCurrency || state.toCurrency != toCurrency) {
-                _uiState.emit(
-                    uiState.value.copy(
-                        fromCurrency = fromCurrency,
-                        toCurrency = toCurrency,
-                        exchange = null,
-                        result = null
+
+                val exchange = if (state.exchange != null && fromCurrency == state.toCurrency) {
+                    Exchange(fromCurrency, toCurrency, 1 / state.exchange.rate)
+                } else {
+                    _uiState.emit(
+                        uiState.value.copy(
+                            fromCurrency = fromCurrency,
+                            toCurrency = toCurrency,
+                            exchange = null,
+                            result = null
+                        )
                     )
-                )
 
-                val exchange = exchangeRepository.findExchange(fromCurrency, toCurrency)
-
+                    exchangeRepository.findExchange(fromCurrency, toCurrency)
+                }
                 _uiState.emit(
                     UiState(
                         fromCurrency = fromCurrency,
@@ -50,12 +54,18 @@ class MainViewModel(
         }
     }
 
-    fun convert(value: Double) {
+    fun convert(valueTxt: String) {
         viewModelScope.launch {
             val state = uiState.value
-
+            val input = valueTxt.trim().replace("\n", "")
+            val value = try {
+                input.toDouble()
+            } catch (t: NumberFormatException) {
+                0.0
+            }
             _uiState.emit(
                 state.copy(
+                    valueTxt = input,
                     value = value,
                     result = internalConvert(value, state.exchange)
                 )
@@ -69,6 +79,7 @@ class MainViewModel(
     data class UiState(
         val fromCurrency: Currency = Currency.USD,
         val toCurrency: Currency = Currency.BRL,
+        val valueTxt: String = "1.0",
         val value: Double = 1.0,
         val exchange: Exchange? = null,
         val result: Double? = null,
