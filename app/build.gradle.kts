@@ -4,6 +4,7 @@ plugins {
 }
 
 val compose_version: String by project
+val koin_version: String by project
 
 dependencies {
 
@@ -21,11 +22,15 @@ dependencies {
     androidTestImplementation("androidx.compose.ui:ui-test-junit4:$compose_version")
     debugImplementation("androidx.compose.ui:ui-tooling:$compose_version")
     debugImplementation("androidx.compose.ui:ui-test-manifest:$compose_version")
+
+    implementation("androidx.glance:glance-appwidget:1.0.0-alpha05")
+    implementation( "io.insert-koin:koin-android:$koin_version")
+    implementation( "com.google.code.gson:gson:2.9.1")
 }
 
 android {
     namespace = "br.com.gmfonseca.gamma.financials"
-    compileSdk = 32
+    compileSdk = 33
 
     defaultConfig {
         applicationId = "br.com.gmfonseca.gamma.financials"

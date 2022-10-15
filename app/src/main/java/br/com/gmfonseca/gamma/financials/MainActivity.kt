@@ -3,7 +3,6 @@ package br.com.gmfonseca.gamma.financials
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -27,14 +26,17 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import br.com.gmfonseca.gamma.financials.data.datasources.LocalExchangeDataSourceImpl
+import br.com.gmfonseca.gamma.financials.data.repositories.ExchangeRepositoryImpl
 import br.com.gmfonseca.gamma.financials.ui.components.CurrencyDropdown
 import br.com.gmfonseca.gamma.financials.ui.components.LabeledTextField
 import br.com.gmfonseca.gamma.financials.ui.theme.MyApplicationTheme
 import br.com.gmfonseca.gamma.financials.ui.viewmodels.MainViewModel
+import org.koin.android.ext.android.inject
 import java.text.DecimalFormat
 
 class MainActivity : ComponentActivity() {
-    private val viewModel by viewModels<MainViewModel>()
+    private val viewModel by inject<MainViewModel>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -144,6 +146,12 @@ fun Greeting(viewModel: MainViewModel) {
 @Composable
 fun DefaultPreview() {
     MyApplicationTheme {
-        Greeting(MainViewModel())
+        Greeting(
+            MainViewModel(
+                ExchangeRepositoryImpl(
+                    LocalExchangeDataSourceImpl()
+                )
+            )
+        )
     }
 }

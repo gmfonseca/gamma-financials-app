@@ -2,18 +2,16 @@ package br.com.gmfonseca.gamma.financials.ui.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import br.com.gmfonseca.gamma.financials.data.repositories.ExchangeRepositoryImpl
 import br.com.gmfonseca.gamma.financials.domain.model.Currency
 import br.com.gmfonseca.gamma.financials.domain.model.Exchange
-import br.com.gmfonseca.gamma.financials.domain.repositories.CurrencyRepository
+import br.com.gmfonseca.gamma.financials.domain.repositories.ExchangeRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 class MainViewModel(
-    private val exchangeRepository: CurrencyRepository = ExchangeRepositoryImpl(),
+    private val exchangeRepository: ExchangeRepository,
 ) : ViewModel() {
-
 
     private val _uiState = MutableStateFlow(UiState())
     val uiState: StateFlow<UiState> get() = _uiState
@@ -29,7 +27,7 @@ class MainViewModel(
             if (state.exchange == null || state.fromCurrency != fromCurrency || state.toCurrency != toCurrency) {
 
                 val exchange = if (state.exchange != null && fromCurrency == state.toCurrency) {
-                    Exchange(fromCurrency, toCurrency, 1 / state.exchange.rate)
+                    Exchange(fromCurrency, toCurrency, 1 / (state.exchange.rate ?: 1.0))
                 } else {
                     _uiState.emit(
                         uiState.value.copy(
@@ -74,7 +72,7 @@ class MainViewModel(
     }
 
     private fun internalConvert(value: Double, exchange: Exchange?): Double? =
-        exchange?.run { rate * value }
+        exchange?.run { (rate ?: 0.0) * value }
 
     data class UiState(
         val fromCurrency: Currency = Currency.USD,
